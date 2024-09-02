@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ include "hello-kubernetes.name" . }}
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  labels:
+    app: {{ .Chart.Name }}
+    origin: {{ .Chart.Name }}
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      origin: {{ .Chart.Name }}
+  workloadRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "hello-kubernetes.name" . }}
+  strategy:
+    blueGreen:
+      activeService: {{ include "hello-kubernetes.name" . }}
+      previewService: {{ include "hello-kubernetes.name" . }}-preview-service
+      autoPromotionEnabled: false
+      scaleDownDelaySeconds: 20
